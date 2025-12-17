@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار المفردات العربية الفصحى - عمل الطالبة شذى الغامدي</title>
+    <!-- تحميل Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- تحميل خط Inter (أنيق وحديث) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* تطبيق خط أميري (Amiri) للغة العربية لزيادة الفخامة والوضوح */
+        body {
+            font-family: 'Amiri', serif;
+            background-color: #eef2ff; /* خلفية أزرق فاتح جداً لتبدو رسمية */
+        }
+        .game-card {
+            box-shadow: 0 15px 40px rgba(49, 54, 73, 0.15); /* ظل عميق وأنيق */
+            border: 1px solid #c7d2fe; /* حد خفيف بلون النيلي الفاتح */
+            transition: transform 0.3s ease-in-out;
+            min-height: 400px; /* لضمان شكل مستقر على جميع الأجهزة */
+        }
+        .option-button {
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 2px solid #a5b4fc; /* حدود واضحة للخيارات */
+        }
+        .option-button:hover:not(.disabled) {
+            background-color: #e0e7ff; /* خلفية ناعمة عند التحويم */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .correct {
+            background-color: #059669 !important; /* لون أخضر داكن للنجاح */
+            color: white !important;
+            border-color: #065f46 !important;
+            font-weight: 700;
+        }
+        .incorrect {
+            background-color: #dc2626 !important; /* لون أحمر داكن للخطأ */
+            color: white !important;
+            border-color: #991b1b !important;
+            font-weight: 700;
+        }
+        /* تصميم زر "إعادة اللعب" */
+        #restartButton {
+            background: linear-gradient(145deg, #4f46e5, #6366f1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        #restartButton:hover {
+            background: linear-gradient(145deg, #4338ca, #4f46e5);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- حاوية اللعبة الرئيسية -->
+    <div id="gameContainer" class="game-card w-full max-w-lg bg-white p-8 md:p-10 rounded-2xl">
+        
+        <!-- عنوان اللعبة والتقدم -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-indigo-800 mb-1">اختبار المفردات الفصحى</h1>
+            <!-- إضافة اسم الطالبة هنا -->
+            <p class="text-gray-700 text-xl font-bold mb-3 border-b-2 border-indigo-200 inline-block px-4 pb-1">عمل الطالبة / شذى الغامدي</p>
+            <p class="text-gray-600 text-lg">اختبر حصيلتك اللغوية في 10 مراحل بمستوى متوسط</p>
+            <div id="progress" class="mt-4 text-center text-xl font-extrabold text-indigo-700 p-2 bg-indigo-100 rounded-lg"></div>
+        </header>
+
+        <!-- منطقة السؤال (الكلمة) -->
+        <div id="questionArea" class="mb-8 text-center bg-indigo-50 p-6 rounded-xl border-2 border-indigo-300">
+            <h2 class="text-4xl font-extrabold text-indigo-900" id="wordDisplay"></h2>
+            <p class="text-md mt-3 text-indigo-600 font-semibold">اختر المعنى الصحيح للكلمة</p>
+            
+            <!-- زر التلميح (Hint) -->
+            <button id="hintButton" onclick="showHint()" class="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-4 rounded-full shadow-md text-sm transition duration-150 ease-in-out">
+                تلميح (-1 نقطة)
+            </button>
+            <p id="hintText" class="text-yellow-800 mt-2 text-md hidden font-bold p-2 bg-yellow-100 rounded-lg"></p>
+        </div>
+
+        <!-- منطقة الخيارات -->
+        <div id="optionsContainer" class="grid grid-cols-1 gap-4">
+            <!-- سيتم إضافة الأزرار هنا بواسطة JavaScript -->
+        </div>
+
+        <!-- منطقة الرسائل والنتيجة النهائية -->
+        <div id="messageBox" class="text-center mt-6 p-4 rounded-xl hidden border-2">
+            <p id="messageText" class="text-xl font-bold"></p>
+            <button id="nextButton" onclick="loadNextLevel()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-full shadow-lg hidden">
+                المرحلة التالية
+            </button>
+            <button id="restartButton" onclick="startGame()" class="mt-4 font-bold py-3 px-8 rounded-full shadow-xl hidden">
+                إعادة اللعب
+            </button>
+        </div>
+    </div>
+
+    <!-- زر تنزيل الموقع -->
+    <div class="text-center mt-6 mb-8">
+        <button onclick="downloadHtmlFile()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-150 ease-in-out">
+            تنزيل ملف الموقع (HTML)
+        </button>
+    </div>
+
+    <!-- تذييل بسيط (اختياري) -->
+    <footer class="mt-8 text-gray-500 text-sm">
+        جميع الحقوق محفوظة. ٢٠٢٤
+    </footer>
+
+    <script>
+        // بيانات اللعبة: 10 مراحل بمستوى متوسط
+        const gameData = [
+            { word: "بَطَر", correctMeaning: "التباهي والتعالي على الحق", falseMeanings: ["الحزن الشديد", "السرعة في المشي", "القوة المفرطة"], hint: "شعور يصيب الغني عند جحود النعمة وعدم الشكر" },
+            { word: "نَضَارة", correctMeaning: "حُسن الوجه والبشرة والبهجة", falseMeanings: ["القِدم والعتَق", "الظلم والجور", "شدة الجوع"], hint: "صفة تدل على الحيوية والجمال الظاهر والاشراق" },
+            { word: "الإباء", correctMeaning: "الامتناع عن الشيء أو الرفض", falseMeanings: ["النسيان والسهو", "القبول والرضا", "الخضوع والاستسلام"], hint: "موقف يتخذه الشخص الحُرّ تجاه الذُلّ أو الخضوع" },
+            { word: "سَجِيَّة", correctMeaning: "الطبيعة والخُلُق", falseMeanings: ["نوع من الأشجار", "قراءة بصوت منخفض", "النحافة الشديدة"], hint: "الشيء الذي يُولد به الإنسان ولا يتغير بسهولة (مزاجه)" },
+            { word: "أَوْبَق", correctMeaning: "أَهْلَكَ أو دَمَّر", falseMeanings: ["أَصْلَحَ أو رَمَّمَ", "سَافَرَ بَعِيدًا", "بَنَى عِمَارَةً"], hint: "تُستخدم لوصف فعل الضرر الشديد أو التسبب في نهاية شيء ما (مصدر الهلاك)" },
+            { word: "الوِزر", correctMeaning: "الحِمل أو الذَّنب", falseMeanings: ["الكنز المفقود", "طريق السفر", "الذهب الخالص"], hint: "شيء ثقيل تحمله الروح أو الجسد، غالباً في سياق المسؤولية السلبية" },
+            { word: "استِفاضة", correctMeaning: "الانتشار والشهرة", falseMeanings: ["تضييق المكان", "التزام الصمت", "جمع المال الكثير"], hint: "عندما ينتقل الخبر بين الناس بشكل واسع ويتوسع" },
+            { word: "مُجحِف", correctMeaning: "ظالم أو مائل عن الإنصاف", falseMeanings: ["كريم وسخي", "متوازن ومعتدل", "بطيء الحركة"], hint: "كلمة تصف قرارًا أو حكمًا غير عادل بحق الآخرين" },
+            { word: "يَتَضَوَّر", correctMeaning: "يتلوى من الجوع أو الألم", falseMeanings: ["يشرب الماء بغزارة", "يضحك بصوت عالٍ", "ينام بعمق"], hint: "فعل يدل على انقباض شديد في البطن وعدم تحمل" },
+            { word: "الدَّأَب", correctMeaning: "العادة والاجتهاد والمواظبة", falseMeanings: ["الكسل والخمول", "التوقف عن العمل", "الشعور بالملل"], hint: "الاستمرار في العمل بجد دون انقطاع أو ملل" }
+        ];
+
+        let currentLevel = 0;
+        let score = 0;
+        let isAnswered = false;
+        let hasUsedHint = false; // متغير لتتبع استخدام التلميح في المرحلة الحالية
+
+        const wordDisplay = document.getElementById('wordDisplay');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const progressDisplay = document.getElementById('progress');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const nextButton = document.getElementById('nextButton');
+        const restartButton = document.getElementById('restartButton');
+        const hintButton = document.getElementById('hintButton');
+        const hintTextDisplay = document.getElementById('hintText');
+
+        // دالة لخلط عناصر مصفوفة
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // دالة تحميل المرحلة الحالية
+        function loadCurrentLevel() {
+            if (currentLevel >= gameData.length) {
+                endGame();
+                return;
+            }
+
+            isAnswered = false;
+            hasUsedHint = false; // إعادة تعيين استخدام التلميح
+            
+            messageBox.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            restartButton.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+
+            // إظهار وتفعيل زر التلميح
+            hintButton.classList.remove('hidden', 'pointer-events-none', 'opacity-50');
+            hintButton.textContent = 'تلميح (-1 نقطة)';
+            hintTextDisplay.classList.add('hidden');
+            hintTextDisplay.textContent = '';
+
+
+            const levelData = gameData[currentLevel];
+            wordDisplay.textContent = levelData.word;
+            
+            // جمع الخيارات وخلطها
+            const allOptions = [
+                levelData.correctMeaning,
+                ...levelData.falseMeanings
+            ];
+            shuffleArray(allOptions);
+
+            // تحديث شريط التقدم
+            progressDisplay.textContent = `المرحلة ${currentLevel + 1} من ${gameData.length} | النقاط: ${score}`;
+
+            // إنشاء أزرار الخيارات
+            allOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'option-button bg-white text-gray-800 font-semibold py-3 px-4 rounded-xl border-2 border-indigo-300 text-lg hover:bg-indigo-50 hover:text-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out';
+                button.setAttribute('data-meaning', option);
+                button.onclick = () => checkAnswer(button, option, levelData.correctMeaning);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // دالة إظهار التلميح
+        function showHint() {
+            if (hasUsedHint || isAnswered) return;
+
+            score = Math.max(0, score - 1); // خصم نقطة واحدة
+            hasUsedHint = true;
+            
+            const levelData = gameData[currentLevel];
+            
+            hintTextDisplay.textContent = `التلميح: ${levelData.hint}`;
+            hintTextDisplay.classList.remove('hidden');
+
+            // تعطيل زر التلميح بعد استخدامه
+            hintButton.classList.add('pointer-events-none', 'opacity-50');
+            hintButton.textContent = 'تم استخدام التلميح';
+            
+            // تحديث شريط التقدم بالنقاط الجديدة
+            progressDisplay.textContent = `المرحلة ${currentLevel + 1} من ${gameData.length} | النقاط: ${score}`;
+        }
+
+
+        // دالة التحقق من الإجابة
+        function checkAnswer(selectedButton, selectedMeaning, correctMeaning) {
+            if (isAnswered) return; // منع النقر المتعدد
+
+            isAnswered = true;
+            nextButton.classList.remove('hidden');
+            hintButton.classList.add('hidden'); // إخفاء التلميح عند الإجابة
+
+            // تعطيل جميع الأزرار
+            Array.from(optionsContainer.children).forEach(btn => {
+                btn.classList.add('disabled', 'pointer-events-none');
+            });
+            
+            messageBox.classList.remove('hidden');
+
+            if (selectedMeaning === correctMeaning) {
+                // إجابة صحيحة
+                score++;
+                selectedButton.classList.add('correct');
+                messageBox.classList.remove('bg-red-100', 'border-red-300', 'text-red-800');
+                messageBox.classList.add('bg-green-100', 'border-green-300', 'text-green-800');
+                messageText.textContent = "إجابة صحيحة! أحسنت.";
+                
+            } else {
+                // إجابة خاطئة
+                selectedButton.classList.add('incorrect');
+                
+                // تحديد الإجابة الصحيحة لإظهارها للمستخدم
+                Array.from(optionsContainer.children).forEach(btn => {
+                    if (btn.getAttribute('data-meaning') === correctMeaning) {
+                        btn.classList.add('correct');
+                    }
+                });
+
+                messageBox.classList.remove('bg-green-100', 'border-green-300', 'text-green-800');
+                messageBox.classList.add('bg-red-100', 'border-red-300', 'text-red-800');
+                messageText.textContent = "إجابة خاطئة. المعنى الصحيح هو: " + correctMeaning;
+            }
+            // تحديث شريط التقدم بالنقاط الجديدة
+            progressDisplay.textContent = `المرحلة ${currentLevel + 1} من ${gameData.length} | النقاط: ${score}`;
+        }
+
+        // دالة تحميل المرحلة التالية
+        function loadNextLevel() {
+            currentLevel++;
+            loadCurrentLevel();
+        }
+
+        // دالة إنهاء اللعبة
+        function endGame() {
+            messageBox.classList.remove('hidden', 'bg-red-100', 'border-red-300', 'text-red-800', 'bg-green-100', 'border-green-300', 'text-green-800');
+            messageBox.classList.add('bg-indigo-100', 'border-indigo-300', 'text-indigo-800');
+            optionsContainer.innerHTML = '';
+            wordDisplay.textContent = 'انتهى الاختبار!';
+            nextButton.classList.add('hidden');
+            restartButton.classList.remove('hidden');
+            hintButton.classList.add('hidden');
+
+            let finalMessage;
+            const percentage = (score / gameData.length) * 100;
+
+            if (percentage >= 90) {
+                finalMessage = `تهانينا! نتيجتك هي ${score} من ${gameData.length}. أنت خبير لغوي بامتياز!`;
+            } else if (percentage >= 70) {
+                finalMessage = `جيد جداً! نتيجتك هي ${score} من ${gameData.length}. لديك حصيلة لغوية ممتازة.`;
+            } else if (percentage >= 50) {
+                finalMessage = `مقبول. نتيجتك هي ${score} من ${gameData.length}. يمكنك تحسين مستواك بالقليل من المراجعة.`;
+            } else {
+                finalMessage = `يمكنك المحاولة مجدداً! نتيجتك هي ${score} من ${gameData.length}.`;
+            }
+            
+            messageText.textContent = finalMessage;
+            progressDisplay.textContent = `النتيجة النهائية: ${score} من ${gameData.length}`;
+        }
+
+        // **دالة تنزيل ملف HTML مباشر (تعمل كتنزيل فعلي)**
+        function downloadHtmlFile() {
+            // الحصول على كامل محتوى الصفحة (الكود المصدري)
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            
+            // إنشاء رابط تحميل مؤقت
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'لعبة_اختبار_المفردات_الفصحى_لشذى.html';
+            
+            // إضافة الرابط إلى الصفحة والنقر عليه تلقائيًا
+            document.body.appendChild(a);
+            a.click();
+            
+            // إزالة الرابط المؤقت
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        }
+
+        // دالة بدء اللعبة
+        function startGame() {
+            currentLevel = 0;
+            score = 0;
+            // خلط ترتيب المراحل لزيادة قابلية الإعادة
+            shuffleArray(gameData); 
+            loadCurrentLevel();
+        }
+
+        // بدء اللعبة عند تحميل الصفحة
+        window.onload = startGame;
+
+    </script>
+</body>
+</html>
