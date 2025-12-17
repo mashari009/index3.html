@@ -3,323 +3,404 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار المفردات العربية الفصحى - عمل الطالبة شذى الغامدي</title>
+    <title>اختبر معلوماتي - الأنظمة البيئية والموارد</title>
     <!-- تحميل Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- تحميل خط Inter (أنيق وحديث) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* تطبيق خط أميري (Amiri) للغة العربية لزيادة الفخامة والوضوح */
-        body {
-            font-family: 'Amiri', serif;
-            background-color: #eef2ff; /* خلفية أزرق فاتح جداً لتبدو رسمية */
+        /* تخصيص الخط ليتناسب مع اللغة العربية */
+        @import url('https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap');
+        :root {
+            --color-primary: #059669; /* أخضر زمردي داكن */
+            --color-background: #F8FBF8; /* خلفية فاتحة جداً */
         }
-        .game-card {
-            box-shadow: 0 15px 40px rgba(49, 54, 73, 0.15); /* ظل عميق وأنيق */
-            border: 1px solid #c7d2fe; /* حد خفيف بلون النيلي الفاتح */
-            transition: transform 0.3s ease-in-out;
-            min-height: 400px; /* لضمان شكل مستقر على جميع الأجهزة */
+        body {
+            font-family: 'Almarai', sans-serif;
+            background-color: var(--color-background);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            width: 95%;
+        }
+        .quiz-card {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border-radius: 2rem;
+            background-color: white;
+            padding: 2rem;
         }
         .option-button {
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            border: 2px solid #a5b4fc; /* حدود واضحة للخيارات */
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
         }
         .option-button:hover:not(.disabled) {
-            background-color: #e0e7ff; /* خلفية ناعمة عند التحويم */
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(5, 150, 105, 0.4); /* ظل أخضر */
         }
-        .correct {
-            background-color: #059669 !important; /* لون أخضر داكن للنجاح */
-            color: white !important;
-            border-color: #065f46 !important;
-            font-weight: 700;
+        
+        /* -------------------------------------- */
+        /* CSS Animation for Correct/Incorrect Feedback */
+        /* -------------------------------------- */
+        
+        /* تأثير اهتزاز خفيف للنجاح (للأعلى والأسفل) */
+        @keyframes correct-wiggle {
+            0%, 100% { transform: translateY(0); }
+            25% { transform: translateY(-5px) scale(1.01); }
+            75% { transform: translateY(3px); }
         }
-        .incorrect {
-            background-color: #dc2626 !important; /* لون أحمر داكن للخطأ */
-            color: white !important;
-            border-color: #991b1b !important;
-            font-weight: 700;
+
+        /* تأثير اهتزاز أفقي للخطأ (لليسار واليمين) */
+        @keyframes incorrect-shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
         }
-        /* تصميم زر "إعادة اللعب" */
-        #restartButton {
-            background: linear-gradient(145deg, #4f46e5, #6366f1);
-            color: white;
-            transition: all 0.3s ease;
+
+        .correct-animation {
+            animation: correct-wiggle 0.4s ease-in-out;
         }
-        #restartButton:hover {
-            background: linear-gradient(145deg, #4338ca, #4f46e5);
-            transform: scale(1.05);
+
+        .incorrect-animation {
+            animation: incorrect-shake 0.4s ease-in-out;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-gray-100 p-4">
 
-    <!-- حاوية اللعبة الرئيسية -->
-    <div id="gameContainer" class="game-card w-full max-w-lg bg-white p-8 md:p-10 rounded-2xl">
+    <div id="quiz-container" class="container">
         
-        <!-- عنوان اللعبة والتقدم -->
+        <!-- رأس اللعبة والعنوان -->
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-extrabold text-indigo-800 mb-1">اختبار المفردات الفصحى</h1>
-            <!-- إضافة اسم الطالبة هنا -->
-            <p class="text-gray-700 text-xl font-bold mb-3 border-b-2 border-indigo-200 inline-block px-4 pb-1">عمل الطالبة / شذى الغامدي</p>
-            <p class="text-gray-600 text-lg">اختبر حصيلتك اللغوية في 10 مراحل بمستوى متوسط</p>
-            <div id="progress" class="mt-4 text-center text-xl font-extrabold text-indigo-700 p-2 bg-indigo-100 rounded-lg"></div>
+            <h1 class="text-5xl font-extrabold text-gray-800 mb-2">اختبر معلوماتي</h1>
+            <h2 class="text-2xl font-bold text-green-700 mb-3">مرحباً بك في اختبار العلوم</h2>
+            <p class="text-lg text-gray-600">اختبار شامل لوحدة الأنظمة البيئية ومواردها (الصف السادس الابتدائي)</p>
+            <p class="text-base font-semibold text-gray-500 mt-2">عمل الطالبة / شذى الغامدي</p>
         </header>
 
-        <!-- منطقة السؤال (الكلمة) -->
-        <div id="questionArea" class="mb-8 text-center bg-indigo-50 p-6 rounded-xl border-2 border-indigo-300">
-            <h2 class="text-4xl font-extrabold text-indigo-900" id="wordDisplay"></h2>
-            <p class="text-md mt-3 text-indigo-600 font-semibold">اختر المعنى الصحيح للكلمة</p>
-            
-            <!-- زر التلميح (Hint) -->
-            <button id="hintButton" onclick="showHint()" class="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-4 rounded-full shadow-md text-sm transition duration-150 ease-in-out">
-                تلميح (-1 نقطة)
+        <!-- بطاقة اللعب الرئيسية -->
+        <div id="game-card" class="quiz-card">
+
+            <!-- مؤشر التقدم والنتيجة -->
+            <div class="flex justify-between items-center mb-8 border-b pb-4 border-gray-200">
+                <div class="text-xl font-bold text-green-700 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 ml-2"><path d="M11 20H15C17.7614 20 20 17.7614 20 15C20 12.2386 17.7614 10 15 10H11C8.23858 10 6 12.2386 6 15C6 17.7614 8.23858 20 11 20ZM11 20V4C11 3.44772 11.4477 3 12 3H15C17.7614 3 20 5.23858 20 8"></path></svg>
+                    النتيجة: <span id="score-display" class="mr-1">0</span>
+                </div>
+                <div class="text-xl font-bold text-gray-600 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 ml-2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                    السؤال: <span id="question-number-display" class="mr-1">0</span> / 10
+                </div>
+            </div>
+
+            <!-- منطقة عرض السؤال -->
+            <div id="question-area" class="min-h-32 mb-10">
+                <p id="question-text" class="text-2xl font-extrabold text-gray-800 leading-relaxed text-center">اضغط "بدء الاختبار" للبدء!</p>
+            </div>
+
+            <!-- منطقة الخيارات -->
+            <div id="options-area" class="space-y-4 mb-10">
+                <!-- هنا ستظهر أزرار الخيارات -->
+            </div>
+
+            <!-- منطقة التلميح والأزرار الإضافية -->
+            <div id="controls-area" class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                
+                <!-- زر التلميح -->
+                <button id="hint-button" onclick="showHint()" class="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-yellow-400 text-yellow-900 font-bold rounded-xl hover:bg-yellow-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-lg shadow-md hover:shadow-lg">
+                    <!-- أيقونة مصباح -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 ml-2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M5 12h2"/><path d="M17 12h2"/><path d="M12 22v-2"/><path d="M4.2 16.2 5.6 14.8"/><path d="M18.4 14.8 19.8 16.2"/></svg>
+                    تلميح (مرة واحدة)
+                </button>
+                
+                <!-- زر التحكم الرئيسي (بدء / التالي / إنهاء) -->
+                <button id="main-button" onclick="startGame()" class="w-full sm:w-auto px-10 py-3 bg-green-600 text-white font-extrabold rounded-xl hover:bg-green-700 transition-colors duration-200 text-xl shadow-lg hover:shadow-xl">
+                    بدء الاختبار
+                </button>
+            </div>
+
+            <!-- شريط رسالة التلميح أو الخطأ -->
+            <div id="message-bar" class="mt-8 p-4 bg-blue-100 border border-blue-300 text-blue-800 rounded-lg hidden text-center">
+                <p id="message-text" class="text-lg font-semibold"></p>
+            </div>
+
+        </div>
+        <!-- نهاية بطاقة اللعب -->
+
+        <!-- منطقة النتائج (تظهر في النهاية) -->
+        <div id="results-area" class="quiz-card mt-6 hidden text-center">
+            <h2 class="text-4xl font-extrabold text-green-700 mb-4">انتهى الاختبار!</h2>
+            <p class="text-xl text-gray-700 mb-6">لقد حققت نتيجة نهائية:</p>
+            <div class="text-6xl font-black text-green-600 mb-8 p-4 bg-green-50 rounded-full inline-block min-w-40 shadow-inner">
+                <span id="final-score">0</span> / 10
+            </div>
+            <p id="result-message" class="text-2xl font-bold mb-8"></p>
+            <button onclick="window.location.reload()" class="px-10 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition-colors duration-200 text-xl shadow-lg">
+                ابدأ اختباراً جديداً
             </button>
-            <p id="hintText" class="text-yellow-800 mt-2 text-md hidden font-bold p-2 bg-yellow-100 rounded-lg"></p>
         </div>
 
-        <!-- منطقة الخيارات -->
-        <div id="optionsContainer" class="grid grid-cols-1 gap-4">
-            <!-- سيتم إضافة الأزرار هنا بواسطة JavaScript -->
-        </div>
-
-        <!-- منطقة الرسائل والنتيجة النهائية -->
-        <div id="messageBox" class="text-center mt-6 p-4 rounded-xl hidden border-2">
-            <p id="messageText" class="text-xl font-bold"></p>
-            <button id="nextButton" onclick="loadNextLevel()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-full shadow-lg hidden">
-                المرحلة التالية
-            </button>
-            <button id="restartButton" onclick="startGame()" class="mt-4 font-bold py-3 px-8 rounded-full shadow-xl hidden">
-                إعادة اللعب
-            </button>
-        </div>
     </div>
-
-    <!-- زر تنزيل الموقع -->
-    <div class="text-center mt-6 mb-8">
-        <button onclick="downloadHtmlFile()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-150 ease-in-out">
-            تنزيل ملف الموقع (HTML)
-        </button>
-    </div>
-
-    <!-- تذييل بسيط (اختياري) -->
-    <footer class="mt-8 text-gray-500 text-sm">
-        جميع الحقوق محفوظة. ٢٠٢٤
-    </footer>
 
     <script>
-        // بيانات اللعبة: 10 مراحل بمستوى متوسط
-        const gameData = [
-            { word: "بَطَر", correctMeaning: "التباهي والتعالي على الحق", falseMeanings: ["الحزن الشديد", "السرعة في المشي", "القوة المفرطة"], hint: "شعور يصيب الغني عند جحود النعمة وعدم الشكر" },
-            { word: "نَضَارة", correctMeaning: "حُسن الوجه والبشرة والبهجة", falseMeanings: ["القِدم والعتَق", "الظلم والجور", "شدة الجوع"], hint: "صفة تدل على الحيوية والجمال الظاهر والاشراق" },
-            { word: "الإباء", correctMeaning: "الامتناع عن الشيء أو الرفض", falseMeanings: ["النسيان والسهو", "القبول والرضا", "الخضوع والاستسلام"], hint: "موقف يتخذه الشخص الحُرّ تجاه الذُلّ أو الخضوع" },
-            { word: "سَجِيَّة", correctMeaning: "الطبيعة والخُلُق", falseMeanings: ["نوع من الأشجار", "قراءة بصوت منخفض", "النحافة الشديدة"], hint: "الشيء الذي يُولد به الإنسان ولا يتغير بسهولة (مزاجه)" },
-            { word: "أَوْبَق", correctMeaning: "أَهْلَكَ أو دَمَّر", falseMeanings: ["أَصْلَحَ أو رَمَّمَ", "سَافَرَ بَعِيدًا", "بَنَى عِمَارَةً"], hint: "تُستخدم لوصف فعل الضرر الشديد أو التسبب في نهاية شيء ما (مصدر الهلاك)" },
-            { word: "الوِزر", correctMeaning: "الحِمل أو الذَّنب", falseMeanings: ["الكنز المفقود", "طريق السفر", "الذهب الخالص"], hint: "شيء ثقيل تحمله الروح أو الجسد، غالباً في سياق المسؤولية السلبية" },
-            { word: "استِفاضة", correctMeaning: "الانتشار والشهرة", falseMeanings: ["تضييق المكان", "التزام الصمت", "جمع المال الكثير"], hint: "عندما ينتقل الخبر بين الناس بشكل واسع ويتوسع" },
-            { word: "مُجحِف", correctMeaning: "ظالم أو مائل عن الإنصاف", falseMeanings: ["كريم وسخي", "متوازن ومعتدل", "بطيء الحركة"], hint: "كلمة تصف قرارًا أو حكمًا غير عادل بحق الآخرين" },
-            { word: "يَتَضَوَّر", correctMeaning: "يتلوى من الجوع أو الألم", falseMeanings: ["يشرب الماء بغزارة", "يضحك بصوت عالٍ", "ينام بعمق"], hint: "فعل يدل على انقباض شديد في البطن وعدم تحمل" },
-            { word: "الدَّأَب", correctMeaning: "العادة والاجتهاد والمواظبة", falseMeanings: ["الكسل والخمول", "التوقف عن العمل", "الشعور بالملل"], hint: "الاستمرار في العمل بجد دون انقطاع أو ملل" }
+        // مصفوفة الأسئلة (الوحدة الثالثة: الأنظمة البيئية ومواردها - 10 أسئلة)
+        const questions = [
+            // درس التربة
+            {
+                text: "ما هي طبقة التربة التي تحتوي على معظم الدبال والمواد العضوية اللازمة لنمو النباتات؟",
+                options: ["أفق C (الصخر الأصلي المتفتت)", "أفق B (التربة التحتية)", "أفق A (التربة السطحية)", "الصخر الأصلي الصلب"],
+                answer: "أفق A (التربة السطحية)",
+                hint: "إنها الطبقة العليا والداكنة اللون في قطاع التربة.",
+                source: "التربة"
+            },
+            {
+                text: "يُعد خليط الرمل والطمي والطين الذي يوفر توازناً مثالياً للماء والهواء للزراعة هو:",
+                options: ["التربة الرملية", "التربة الطينية (الصلصالية)", "التربة الطفالية (اللومي)", "تربة الحصى"],
+                answer: "التربة الطفالية (اللومي)",
+                hint: "يحتوي هذا النوع على أفضل خصائص من باقي الأنواع للزراعة.",
+                source: "أنواع التربة"
+            },
+            // درس الأنظمة البيئية
+            {
+                text: "ما الذي يصف العلاقة التي يستفيد فيها كائن حي ويتضرر الآخر، مثل الفطر على شجرة حية؟",
+                options: ["التعايش", "التقايض", "التنافس", "التطفل"],
+                answer: "التطفل",
+                hint: "يتغذى الكائن المتطفل على حساب الكائن المضيف.",
+                source: "العلاقات في الأنظمة البيئية"
+            },
+            {
+                text: "ماذا تسمى المخلوقات الحية التي تتغذى على بقايا المخلوقات الميتة والمواد العضوية لتحللها وإعادتها للتربة؟",
+                options: ["المنتجات", "المستهلكات الأولية", "المحللات", "المفترسات"],
+                answer: "المحللات",
+                hint: "هي كائنات حية دقيقة مثل البكتيريا والفطريات.",
+                source: "سلسلة الغذاء"
+            },
+            // درس الدورات في الطبيعة
+            {
+                text: "ما هي العملية التي يتم فيها تحويل الماء السائل إلى بخار ماء (غاز) بفعل حرارة الشمس؟",
+                options: ["الهطول", "التكثف", "الجريان السطحي", "التبخر"],
+                answer: "التبخر",
+                hint: "هذه العملية هي بداية دورة الماء في الطبيعة.",
+                source: "دورة الماء"
+            },
+            {
+                text: "كيف يعود الكربون إلى الغلاف الجوي من خلال المخلوقات الحية؟",
+                options: ["التركيب الضوئي", "التكثف", "التنفس", "الهطول"],
+                answer: "التنفس",
+                hint: "تطلق المخلوقات الحية غازاً يحتوي على الكربون عند تنفسها.",
+                source: "دورة الكربون"
+            },
+            // درس الموارد الطبيعية وحمايتها
+            {
+                text: "أي من الموارد التالية يُعد مورداً طبيعياً غير متجدد؟",
+                options: ["الماء", "ضوء الشمس", "الفحم الحجري", "الرياح"],
+                answer: "الفحم الحجري",
+                hint: "يستغرق تكونه ملايين السنين، ويستهلك بمعدل أسرع من تكوّنه.",
+                source: "الموارد الطبيعية"
+            },
+            {
+                text: "الزراعة على شكل مَدرجات (تراسات) في المناطق الجبلية تهدف بشكل أساسي إلى:",
+                options: ["زيادة التلوث", "تسهيل الرياح", "تقليل انجراف التربة", "زيادة التبخر"],
+                answer: "تقليل انجراف التربة",
+                hint: "هي طريقة لحفظ التربة من الانجراف بفعل الماء على المنحدرات.",
+                source: "حماية الموارد"
+            },
+            // أسئلة مدمجة إضافية
+            {
+                text: "في السلسلة الغذائية، تُعتبر النباتات مخلوقات حية ____________ لأنها تنتج غذائها بنفسها.",
+                options: ["مستهلكة", "محللة", "منتجة", "قارتة"],
+                answer: "منتجة",
+                hint: "تستخدم هذه الكائنات ضوء الشمس لتصنع غذائها.",
+                source: "سلاسل الغذاء"
+            },
+            {
+                text: "ما هو أفضل وصف لمصطلح 'النظام البيئي'؟",
+                options: ["المخلوقات الحية فقط في منطقة ما.", "المكونات غير الحية فقط في منطقة ما.", "المخلوقات الحية و المكونات غير الحية التي تتفاعل معاً في منطقة معينة.", "مجموعة من المخلوقات من النوع نفسه تعيش معاً."],
+                answer: "المخلوقات الحية و المكونات غير الحية التي تتفاعل معاً في منطقة معينة.",
+                hint: "النظام البيئي يشمل العناصر الحيوية واللا حيوية.",
+                source: "تعريف النظام البيئي"
+            }
         ];
 
-        let currentLevel = 0;
+        let currentQuestionIndex = 0;
         let score = 0;
-        let isAnswered = false;
-        let hasUsedHint = false; // متغير لتتبع استخدام التلميح في المرحلة الحالية
+        let hintUsed = false;
+        let gameStarted = false;
 
-        const wordDisplay = document.getElementById('wordDisplay');
-        const optionsContainer = document.getElementById('optionsContainer');
-        const progressDisplay = document.getElementById('progress');
-        const messageBox = document.getElementById('messageBox');
-        const messageText = document.getElementById('messageText');
-        const nextButton = document.getElementById('nextButton');
-        const restartButton = document.getElementById('restartButton');
-        const hintButton = document.getElementById('hintButton');
-        const hintTextDisplay = document.getElementById('hintText');
+        const totalQuestions = questions.length; 
 
-        // دالة لخلط عناصر مصفوفة
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+        const quizContainer = document.getElementById('quiz-container');
+        const questionText = document.getElementById('question-text');
+        const optionsArea = document.getElementById('options-area');
+        const scoreDisplay = document.getElementById('score-display');
+        const questionNumberDisplay = document.getElementById('question-number-display');
+        const mainButton = document.getElementById('main-button');
+        const hintButton = document.getElementById('hint-button');
+        const messageBar = document.getElementById('message-bar');
+        const messageText = document.getElementById('message-text');
+        const resultsArea = document.getElementById('results-area');
+        const gameCard = document.getElementById('game-card');
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+
+        // تحديث عدد الأسئلة الكلي في الواجهة عند التحميل
+        document.addEventListener('DOMContentLoaded', () => {
+             document.querySelector('#quiz-container .flex div:last-child span').textContent = totalQuestions;
+        });
+       
+
+        function startGame() {
+            if (!gameStarted) {
+                gameStarted = true;
+                currentQuestionIndex = 0;
+                score = 0;
+                gameCard.classList.remove('hidden');
+                resultsArea.classList.add('hidden');
+                mainButton.textContent = "السؤال التالي";
+                mainButton.disabled = true; 
+                messageBar.classList.add('hidden');
+            } else {
+                currentQuestionIndex++;
+                mainButton.disabled = true;
+            }
+            
+            if (currentQuestionIndex < totalQuestions) {
+                displayQuestion();
+            } else {
+                showResult();
             }
         }
 
-        // دالة تحميل المرحلة الحالية
-        function loadCurrentLevel() {
-            if (currentLevel >= gameData.length) {
-                endGame();
-                return;
-            }
-
-            isAnswered = false;
-            hasUsedHint = false; // إعادة تعيين استخدام التلميح
+        function displayQuestion() {
+            const q = questions[currentQuestionIndex];
+            optionsArea.innerHTML = '';
+            hintUsed = false;
             
-            messageBox.classList.add('hidden');
-            nextButton.classList.add('hidden');
-            restartButton.classList.add('hidden');
-            optionsContainer.innerHTML = '';
-
-            // إظهار وتفعيل زر التلميح
-            hintButton.classList.remove('hidden', 'pointer-events-none', 'opacity-50');
-            hintButton.textContent = 'تلميح (-1 نقطة)';
-            hintTextDisplay.classList.add('hidden');
-            hintTextDisplay.textContent = '';
-
-
-            const levelData = gameData[currentLevel];
-            wordDisplay.textContent = levelData.word;
+            questionText.textContent = q.text;
+            questionNumberDisplay.textContent = currentQuestionIndex + 1;
+            scoreDisplay.textContent = score;
             
-            // جمع الخيارات وخلطها
-            const allOptions = [
-                levelData.correctMeaning,
-                ...levelData.falseMeanings
-            ];
-            shuffleArray(allOptions);
+            // تهيئة زر التلميح
+            hintButton.disabled = false;
+            hintButton.classList.remove('bg-gray-400', 'text-gray-800');
+            hintButton.classList.add('bg-yellow-400', 'text-yellow-900');
+            messageBar.classList.add('hidden');
 
-            // تحديث شريط التقدم
-            progressDisplay.textContent = `المرحلة ${currentLevel + 1} من ${gameData.length} | النقاط: ${score}`;
-
-            // إنشاء أزرار الخيارات
-            allOptions.forEach(option => {
+            q.options.forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option;
-                button.className = 'option-button bg-white text-gray-800 font-semibold py-3 px-4 rounded-xl border-2 border-indigo-300 text-lg hover:bg-indigo-50 hover:text-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out';
-                button.setAttribute('data-meaning', option);
-                button.onclick = () => checkAnswer(button, option, levelData.correctMeaning);
-                optionsContainer.appendChild(button);
+                button.classList.add(
+                    'option-button', 'w-full', 'p-4', 'border-2', 'border-green-300', 'bg-green-50', 'text-gray-800', 
+                    'font-bold', 'rounded-xl', 'text-lg', 'text-right', 'shadow-md', 'transition-colors', 'duration-200',
+                    'hover:bg-green-200', 'focus:outline-none', 'focus:ring-4', 'focus:ring-green-500'
+                );
+                button.onclick = () => checkAnswer(button, option, q.answer);
+                optionsArea.appendChild(button);
             });
         }
 
-        // دالة إظهار التلميح
-        function showHint() {
-            if (hasUsedHint || isAnswered) return;
-
-            score = Math.max(0, score - 1); // خصم نقطة واحدة
-            hasUsedHint = true;
-            
-            const levelData = gameData[currentLevel];
-            
-            hintTextDisplay.textContent = `التلميح: ${levelData.hint}`;
-            hintTextDisplay.classList.remove('hidden');
-
-            // تعطيل زر التلميح بعد استخدامه
-            hintButton.classList.add('pointer-events-none', 'opacity-50');
-            hintButton.textContent = 'تم استخدام التلميح';
-            
-            // تحديث شريط التقدم بالنقاط الجديدة
-            progressDisplay.textContent = `المرحلة ${currentLevel + 1} من ${gameData.length} | النقاط: ${score}`;
-        }
-
-
-        // دالة التحقق من الإجابة
-        function checkAnswer(selectedButton, selectedMeaning, correctMeaning) {
-            if (isAnswered) return; // منع النقر المتعدد
-
-            isAnswered = true;
-            nextButton.classList.remove('hidden');
-            hintButton.classList.add('hidden'); // إخفاء التلميح عند الإجابة
-
-            // تعطيل جميع الأزرار
-            Array.from(optionsContainer.children).forEach(btn => {
-                btn.classList.add('disabled', 'pointer-events-none');
+        function checkAnswer(selectedButton, selectedOption, correctAnswer) {
+            // تعطيل جميع الأزرار بعد الاختيار
+            Array.from(optionsArea.children).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('disabled');
+                btn.classList.remove('hover:bg-green-200', 'hover:shadow-lg');
             });
-            
-            messageBox.classList.remove('hidden');
 
-            if (selectedMeaning === correctMeaning) {
-                // إجابة صحيحة
+            hintButton.disabled = true; 
+            mainButton.disabled = false; 
+
+            if (selectedOption === correctAnswer) {
                 score++;
-                selectedButton.classList.add('correct');
-                messageBox.classList.remove('bg-red-100', 'border-red-300', 'text-red-800');
-                messageBox.classList.add('bg-green-100', 'border-green-300', 'text-green-800');
-                messageText.textContent = "إجابة صحيحة! أحسنت.";
-                
+                // لون الإجابة الصحيحة: أخضر داكن (لتوضيح النص الأبيض) مع الأنميشن
+                selectedButton.classList.remove('bg-green-50', 'border-green-300', 'text-gray-800', 'shadow-md'); 
+                selectedButton.classList.add('bg-green-700', 'text-white', 'border-green-800', 'correct-animation', 'shadow-xl');
+                showMessage("أحسنت! إجابة صحيحة.", 'success');
             } else {
-                // إجابة خاطئة
-                selectedButton.classList.add('incorrect');
+                // لون الإجابة الخاطئة: أحمر مع الأنميشن
+                selectedButton.classList.add('bg-red-500', 'text-white', 'border-red-600', 'incorrect-animation', 'shadow-xl'); 
                 
-                // تحديد الإجابة الصحيحة لإظهارها للمستخدم
-                Array.from(optionsContainer.children).forEach(btn => {
-                    if (btn.getAttribute('data-meaning') === correctMeaning) {
-                        btn.classList.add('correct');
-                    }
-                });
+                // تحديد الإجابة الصحيحة
+                const correctBtn = Array.from(optionsArea.children).find(btn => btn.textContent === correctAnswer);
+                correctBtn.classList.remove('bg-green-50', 'border-green-300');
+                correctBtn.classList.add('bg-green-300', 'text-gray-900', 'border-green-500', 'font-extrabold', 'shadow-md');
 
-                messageBox.classList.remove('bg-green-100', 'border-green-300', 'text-green-800');
-                messageBox.classList.add('bg-red-100', 'border-red-300', 'text-red-800');
-                messageText.textContent = "إجابة خاطئة. المعنى الصحيح هو: " + correctMeaning;
-            }
-            // تحديث شريط التقدم بالنقاط الجديدة
-            progressDisplay.textContent = `المرحلة ${currentLevel + 1} من ${gameData.length} | النقاط: ${score}`;
-        }
-
-        // دالة تحميل المرحلة التالية
-        function loadNextLevel() {
-            currentLevel++;
-            loadCurrentLevel();
-        }
-
-        // دالة إنهاء اللعبة
-        function endGame() {
-            messageBox.classList.remove('hidden', 'bg-red-100', 'border-red-300', 'text-red-800', 'bg-green-100', 'border-green-300', 'text-green-800');
-            messageBox.classList.add('bg-indigo-100', 'border-indigo-300', 'text-indigo-800');
-            optionsContainer.innerHTML = '';
-            wordDisplay.textContent = 'انتهى الاختبار!';
-            nextButton.classList.add('hidden');
-            restartButton.classList.remove('hidden');
-            hintButton.classList.add('hidden');
-
-            let finalMessage;
-            const percentage = (score / gameData.length) * 100;
-
-            if (percentage >= 90) {
-                finalMessage = `تهانينا! نتيجتك هي ${score} من ${gameData.length}. أنت خبير لغوي بامتياز!`;
-            } else if (percentage >= 70) {
-                finalMessage = `جيد جداً! نتيجتك هي ${score} من ${gameData.length}. لديك حصيلة لغوية ممتازة.`;
-            } else if (percentage >= 50) {
-                finalMessage = `مقبول. نتيجتك هي ${score} من ${gameData.length}. يمكنك تحسين مستواك بالقليل من المراجعة.`;
-            } else {
-                finalMessage = `يمكنك المحاولة مجدداً! نتيجتك هي ${score} من ${gameData.length}.`;
+                showMessage(`للأسف، إجابة خاطئة. الإجابة الصحيحة هي: ${correctAnswer}`, 'error');
             }
             
-            messageText.textContent = finalMessage;
-            progressDisplay.textContent = `النتيجة النهائية: ${score} من ${gameData.length}`;
+            scoreDisplay.textContent = score;
+            updateMainButtonText();
         }
 
-        // **دالة تنزيل ملف HTML مباشر (تعمل كتنزيل فعلي)**
-        function downloadHtmlFile() {
-            // الحصول على كامل محتوى الصفحة (الكود المصدري)
-            const htmlContent = document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-            
-            // إنشاء رابط تحميل مؤقت
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'لعبة_اختبار_المفردات_الفصحى_لشذى.html';
-            
-            // إضافة الرابط إلى الصفحة والنقر عليه تلقائيًا
-            document.body.appendChild(a);
-            a.click();
-            
-            // إزالة الرابط المؤقت
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
+        function showHint() {
+            if (hintUsed) return;
+
+            hintUsed = true;
+            hintButton.disabled = true;
+            hintButton.classList.remove('bg-yellow-400', 'text-yellow-900');
+            hintButton.classList.add('bg-gray-400', 'text-gray-800');
+
+            const hint = questions[currentQuestionIndex].hint;
+            showMessage(`💡 تلميح: ${hint}`, 'info');
         }
 
-        // دالة بدء اللعبة
-        function startGame() {
-            currentLevel = 0;
-            score = 0;
-            // خلط ترتيب المراحل لزيادة قابلية الإعادة
-            shuffleArray(gameData); 
-            loadCurrentLevel();
+        function showMessage(text, type) {
+            messageText.textContent = text;
+            messageBar.classList.remove('hidden', 'bg-red-100', 'bg-green-100', 'bg-blue-100', 'border-red-300', 'border-green-300', 'border-blue-300', 'text-red-800', 'text-green-800', 'text-blue-800');
+            
+            if (type === 'success') {
+                messageBar.classList.add('bg-green-100', 'border-green-300', 'text-green-800');
+            } else if (type === 'error') {
+                messageBar.classList.add('bg-red-100', 'border-red-300', 'text-red-800');
+            } else if (type === 'info') {
+                messageBar.classList.add('bg-blue-100', 'border-blue-300', 'text-blue-800');
+            }
         }
 
-        // بدء اللعبة عند تحميل الصفحة
-        window.onload = startGame;
+        function updateMainButtonText() {
+            if (currentQuestionIndex === totalQuestions - 1) {
+                mainButton.textContent = "إنهاء الاختبار ومشاهدة النتيجة";
+            } else {
+                mainButton.textContent = "السؤال التالي";
+            }
+        }
+
+        function showResult() {
+            gameCard.classList.add('hidden');
+            resultsArea.classList.remove('hidden');
+            finalScore.textContent = score;
+            
+            let message = "";
+            const total = totalQuestions;
+            if (score === total) {
+                message = "مذهل! أداء مثالي. أنتِ بطلة الأنظمة البيئية ومواردها!";
+                resultMessage.classList.add('text-green-600');
+                resultMessage.classList.remove('text-orange-600', 'text-red-600');
+            } else if (score >= total * 0.7) {
+                message = "رائع! حصلتِ على نتيجة ممتازة. بعض المراجعة البسيطة ستجعلك تحصلين على العلامة الكاملة.";
+                resultMessage.classList.add('text-orange-600');
+                resultMessage.classList.remove('text-green-600', 'text-red-600');
+            } else {
+                message = "نتيجة جيدة! تحتاجين لمراجعة معمقة لوحدة الأنظمة البيئية ومواردها. لا تيأسي، المحاولة القادمة ستكون أفضل!";
+                resultMessage.classList.add('text-red-600');
+                resultMessage.classList.remove('text-green-600', 'text-orange-600');
+            }
+            resultMessage.textContent = message;
+        }
+
+        // تهيئة البدء (إظهار الشاشة الافتتاحية)
+        document.addEventListener('DOMContentLoaded', () => {
+            questionNumberDisplay.textContent = "0";
+            
+            questionText.textContent = "اختبار شامل لوحدة الأنظمة البيئية ومواردها. استعد جيداً! اضغط 'بدء الاختبار' للبدء.";
+            optionsArea.innerHTML = '';
+            mainButton.disabled = false;
+            hintButton.disabled = true;
+            resultsArea.classList.add('hidden');
+            gameCard.classList.remove('hidden');
+        });
 
     </script>
 </body>
